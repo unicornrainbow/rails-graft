@@ -1,4 +1,4 @@
-# Rails::Graft
+# rails-graft
 
 Replicate Rails controllers, models and views like a boss.
 
