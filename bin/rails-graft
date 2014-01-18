@@ -1,0 +1,60 @@
+#! /usr/bin/env ruby
+#
+# Simple tool to graft controller, model and views in a rails application onto a
+# new set.
+
+require 'active_support/inflector'
+
+if ARGV.empty?
+  puts <<-EOF
+    Grafts a portion of a rails application onto another set (Controller, model, views, etc...)
+
+    Usage:
+
+      rails-graft <source> <target>
+
+    Example:
+
+      rails-graft post comment
+
+  EOF
+  exit
+end
+
+source = ARGV[0]
+target = ARGV[1]
+
+source = source.singularize.underscore
+target = target.singularize.underscore
+
+plural_source = source.pluralize
+plural_target = target.pluralize
+
+# Should do plural versions too, and first.
+@model_file_path = "app/models/#{target}.rb"
+@controller_file_path = "app/controllers/#{plural_target}_controller.rb"
+@view_path = "app/views/#{plural_target}"
+
+# Copy das files
+`cp app/models/#{source}.rb #{@model_file_path}`
+`cp app/controllers/#{plural_source}_controller.rb #{@controller_file_path}`
+`mkdir #{@view_path}`
+Dir.glob("app/views/#{plural_source}/*") do |file|
+  `cp #{file} #{file.gsub(source, target)}`
+end
+
+# Need one of these for replaceing shit.
+def sub_pattern(match, replacement)
+  `sed -i "" -e "s/#{match}/#{replacement}/g" #{@controller_file_path}`
+  `sed -i "" -e "s/#{match}/#{replacement}/g" #{@model_file_path}`
+
+  Dir.glob("#{@view_path}/*.*") do |file|
+    `sed -i "" -e "s/#{match}/#{replacement}/g" #{file}`
+  end
+end
+
+# Replace all the things.
+sub_pattern(plural_source.camelize, plural_target.camelize)
+sub_pattern(plural_source.underscore, plural_target.underscore)
+sub_pattern(source.camelize, target.camelize)
+sub_pattern(source.underscore, target.underscore)
