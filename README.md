@@ -4,16 +4,6 @@ Replicate Rails controllers, models and views like a boss.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-    gem 'rails-graft'
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
     $ gem install rails-graft
 
 ## Usage
